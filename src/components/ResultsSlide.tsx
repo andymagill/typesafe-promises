@@ -1,7 +1,7 @@
-import React from 'react';
 import { quizQuestions } from '../data/quizQuestions';
 import { lessons } from '../data/lessons';
 import { calculateProficiency, getProficiencyLevel } from '../utils/randomization';
+import { PROFICIENCY_THRESHOLDS } from '../types';
 import { Award, ArrowRight, BookOpen } from 'lucide-react';
 
 interface ResultsSlideProps {
@@ -11,34 +11,54 @@ interface ResultsSlideProps {
 }
 
 export function ResultsSlide({ results, onRetakeQuiz, onBackHome }: ResultsSlideProps) {
-  const correctCount = results.reduce((acc, result) => {
-    const question = quizQuestions.find(q => q.id === result.questionId);
-    const selectedOption = question?.options.find(o => o.id === result.selectedOptionId);
-    return acc + (selectedOption?.isCorrect ? 1 : 0);
-  }, 0);
+  // Pre-build lookup maps for O(1) access instead of O(n) searches
+  const questionMap = new Map(quizQuestions.map(q => [q.id, q]));
+  const optionMap = new Map(
+    quizQuestions.flatMap(q => q.options.map(o => [o.id, o]))
+  );
+  const lessonMap = new Map(lessons.map(l => [l.id, l]));
+
+  // Single pass to calculate score and find incorrect results
+  let correctCount = 0;
+  const incorrectQuestionIds: string[] = [];
+
+  results.forEach(result => {
+    const selectedOption = optionMap.get(result.selectedOptionId);
+    if (selectedOption?.isCorrect) {
+      correctCount++;
+    } else {
+      incorrectQuestionIds.push(result.questionId);
+    }
+  });
 
   const proficiency = calculateProficiency(correctCount, results.length);
   const level = getProficiencyLevel(proficiency);
 
-  const incorrectResults = results.filter(result => {
-    const question = quizQuestions.find(q => q.id === result.questionId);
-    const selectedOption = question?.options.find(o => o.id === result.selectedOptionId);
-    return !selectedOption?.isCorrect;
-  });
+  // Get unique recommended lessons using Set for deduplication
+  const recommendedLessonIds = Array.from(
+    new Set(
+      incorrectQuestionIds
+        .map(qId => questionMap.get(qId)?.relatedLessonId)
+        .filter((id): id is string => id !== undefined)
+    )
+  );
 
-  const recommendations = Array.from(new Set(
-    incorrectResults
-      .map(result => {
-        const question = quizQuestions.find(q => q.id === result.questionId);
-        return question?.relatedLessonId;
-      })
-      .filter(Boolean) as string[]
-  )).map(lessonId => lessons.find(l => l.id === lessonId)).filter(Boolean);
+  const recommendations = recommendedLessonIds
+    .map(lessonId => lessonMap.get(lessonId))
+    .filter((lesson): lesson is typeof lessons[0] => lesson !== undefined);
 
   const scoreColor =
-    proficiency >= 80 ? 'text-green-600' : proficiency >= 60 ? 'text-yellow-600' : 'text-red-600';
+    proficiency >= PROFICIENCY_THRESHOLDS.ADVANCED
+      ? 'text-green-600'
+      : proficiency >= PROFICIENCY_THRESHOLDS.INTERMEDIATE
+        ? 'text-yellow-600'
+        : 'text-red-600';
   const scoreBg =
-    proficiency >= 80 ? 'bg-green-50' : proficiency >= 60 ? 'bg-yellow-50' : 'bg-red-50';
+    proficiency >= PROFICIENCY_THRESHOLDS.ADVANCED
+      ? 'bg-green-50'
+      : proficiency >= PROFICIENCY_THRESHOLDS.INTERMEDIATE
+        ? 'bg-yellow-50'
+        : 'bg-red-50';
 
   return (
     <div className="h-full overflow-y-auto pb-32">
@@ -68,9 +88,9 @@ export function ResultsSlide({ results, onRetakeQuiz, onBackHome }: ResultsSlide
           <div className="w-full bg-gray-300 rounded-full h-3">
             <div
               className={`h-3 rounded-full transition-all duration-1000 ${
-                proficiency >= 80
+                proficiency >= PROFICIENCY_THRESHOLDS.ADVANCED
                   ? 'bg-green-600'
-                  : proficiency >= 60
+                  : proficiency >= PROFICIENCY_THRESHOLDS.INTERMEDIATE
                     ? 'bg-yellow-600'
                     : 'bg-red-600'
               }`}

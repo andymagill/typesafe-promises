@@ -1,4 +1,3 @@
-import React from 'react';
 import { lessons } from '../data/lessons';
 import { BookOpen, Award, ArrowRight, RotateCcw } from 'lucide-react';
 import { UserProgress } from '../types';
@@ -17,9 +16,14 @@ export function HomeSlide({
   onResetProgress,
 }: HomeSlideProps) {
   const lastQuizAttempt = progress.quizAttempts[progress.quizAttempts.length - 1];
-  const completionPercentage = Math.round(
-    (progress.completedLessons.length / lessons.length) * 100
-  );
+  
+  // Guard against empty lessons array
+  const completionPercentage = lessons.length > 0
+    ? Math.round((progress.completedLessons.length / lessons.length) * 100)
+    : 0;
+
+  // Pre-compute Set for O(1) lookups instead of O(n) Array.includes()
+  const completedSet = new Set(progress.completedLessons);
 
   return (
     <div className="h-full overflow-y-auto pb-8">
@@ -86,38 +90,43 @@ export function HomeSlide({
           </div>
 
           <div className="grid grid-cols-2 gap-6">
-            {lessons.map(lesson => (
-              <button
-                key={lesson.id}
-                onClick={() => onSelectLesson(lesson.id)}
-                className={`p-6 rounded-lg border-2 text-left transition-all hover:shadow-lg ${
-                  progress.completedLessons.includes(lesson.id)
-                    ? 'border-green-200 bg-green-50'
-                    : lesson.prerequisites.every(p => progress.completedLessons.includes(p))
-                      ? 'border-blue-200 bg-white hover:border-blue-400'
-                      : 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
-                } animate-fadeIn`}
-                disabled={!lesson.prerequisites.every(p => progress.completedLessons.includes(p))}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">
-                      {lesson.difficulty}
-                    </p>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{lesson.title}</h3>
-                    <p className="text-gray-600 text-sm mb-4">{lesson.description}</p>
-                    <p className="text-xs text-gray-500">
-                      {lesson.estimatedTime} min read
-                    </p>
-                  </div>
-                  {progress.completedLessons.includes(lesson.id) && (
-                    <div className="ml-4 px-3 py-1 rounded-full bg-green-200 text-green-800 text-xs font-semibold whitespace-nowrap">
-                      Complete
+            {lessons.map(lesson => {
+              const isCompleted = completedSet.has(lesson.id);
+              const isUnlocked = lesson.prerequisites.every(p => completedSet.has(p));
+              return (
+                <button
+                  key={lesson.id}
+                  onClick={() => onSelectLesson(lesson.id)}
+                  className={`p-6 rounded-lg border-2 text-left transition-all hover:shadow-lg ${
+                    isCompleted
+                      ? 'border-green-200 bg-green-50'
+                      : isUnlocked
+                        ? 'border-blue-200 bg-white hover:border-blue-400'
+                        : 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
+                  } animate-fadeIn`}
+                  disabled={!isUnlocked}
+                  title={!isUnlocked ? 'Complete prerequisites to unlock' : undefined}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">
+                        {lesson.difficulty}
+                      </p>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">{lesson.title}</h3>
+                      <p className="text-gray-600 text-sm mb-4">{lesson.description}</p>
+                      <p className="text-xs text-gray-500">
+                        {lesson.estimatedTimeMinutes} min read
+                      </p>
                     </div>
-                  )}
-                </div>
-              </button>
-            ))}
+                    {isCompleted && (
+                      <div className="ml-4 px-3 py-1 rounded-full bg-green-200 text-green-800 text-xs font-semibold whitespace-nowrap">
+                        Complete
+                      </div>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
 

@@ -1,6 +1,5 @@
-import React from 'react';
 import { Copy, Check } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface CodeBlockProps {
   code: string;
@@ -9,11 +8,32 @@ interface CodeBlockProps {
 
 export function CodeBlock({ code, language = 'typescript' }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    return () => {
+      // Cleanup: clear any pending timeout on unmount
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+
+      // Clear any existing timer before setting a new one
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+
+      timerRef.current = setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('[CodeBlock] Failed to copy to clipboard', err);
+      // Optionally: Show an error message to the user
+    }
   };
 
   return (
@@ -22,11 +42,12 @@ export function CodeBlock({ code, language = 'typescript' }: CodeBlockProps) {
         onClick={handleCopy}
         className="absolute top-4 right-4 p-2 hover:bg-gray-800 rounded-lg transition-colors z-10"
         title="Copy code"
+        aria-label="Copy code to clipboard"
       >
         {copied ? (
-          <Check size={20} className="text-green-400" />
+          <Check size={20} className="text-green-400" aria-hidden="true" />
         ) : (
-          <Copy size={20} className="text-gray-400" />
+          <Copy size={20} className="text-gray-400" aria-hidden="true" />
         )}
       </button>
 

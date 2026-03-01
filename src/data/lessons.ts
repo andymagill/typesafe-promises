@@ -7,7 +7,7 @@ export const lessons: Lesson[] = [
     description: 'Master the fundamentals of JavaScript Promises and their three states',
     difficulty: Difficulty.Beginner,
     prerequisites: [],
-    estimatedTime: 12,
+    estimatedTimeMinutes: 12,
     sections: [
       {
         id: 'intro-1',
@@ -100,7 +100,7 @@ fetchData
     description: 'Understanding TypeScript generics with Promise types',
     difficulty: Difficulty.Intermediate,
     prerequisites: ['intro-promises'],
-    estimatedTime: 15,
+    estimatedTimeMinutes: 15,
     sections: [
       {
         id: 'generic-1',
@@ -186,7 +186,7 @@ const finalPromise: Promise<boolean> = stringPromise
     description: 'Mastering type-safe error handling in catch blocks',
     difficulty: Difficulty.Intermediate,
     prerequisites: ['intro-promises', 'generic-syntax'],
-    estimatedTime: 18,
+    estimatedTimeMinutes: 18,
     sections: [
       {
         id: 'error-1',
@@ -279,7 +279,7 @@ fetchData().catch((error) => {
     description: 'Master Promise.all, async/await, and complex patterns',
     difficulty: Difficulty.Advanced,
     prerequisites: ['intro-promises', 'generic-syntax', 'error-handling'],
-    estimatedTime: 20,
+    estimatedTimeMinutes: 20,
     sections: [
       {
         id: 'advanced-1',

@@ -1,3 +1,18 @@
+/**
+ * Proficiency level thresholds for quiz scoring (percentage-based)
+ */
+export const PROFICIENCY_THRESHOLDS = {
+  EXPERT: 90,
+  ADVANCED: 75,
+  INTERMEDIATE: 60,
+  BEGINNER: 40,
+} as const;
+
+/**
+ * Number of questions per quiz session
+ */
+export const QUIZ_QUESTION_COUNT = 5;
+
 export enum Difficulty {
   Beginner = 'beginner',
   Intermediate = 'intermediate',
@@ -24,7 +39,8 @@ export interface Lesson {
     codeExample?: string;
     exercise?: CodeExercise;
   }>;
-  estimatedTime: number;
+  /** Estimated time to complete lesson in minutes */
+  estimatedTimeMinutes: number;
 }
 
 export interface QuizOption {
@@ -65,7 +81,8 @@ export interface QuizAttempt {
   selectedQuestions: string[];
 }
 
-export type SlideType = 'home' | 'lesson' | 'exercise' | 'quiz' | 'results';
+/** Type of slide component to render */
+export type SlideType = 'home' | 'lesson' | 'quiz' | 'results';
 
 export interface Slide {
   id: string;

@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { HomeSlide } from './components/HomeSlide';
 import { LessonSlide } from './components/LessonSlide';
 import { QuizSlide } from './components/QuizSlide';
 import { ResultsSlide } from './components/ResultsSlide';
 import { SlideContainer } from './components/SlideContainer';
 import { SlideNavigation } from './components/SlideNavigation';
-import { UserProgress, SlideType } from './types';
+import { UserProgress, Slide, SlideType, QUIZ_QUESTION_COUNT } from './types';
 import {
   getProgress,
-  saveProgress,
   completeLesson,
   addQuizAttempt,
   resetProgress,
@@ -16,33 +15,21 @@ import {
 import { getRandomQuizQuestions, calculateProficiency } from './utils/randomization';
 import { quizQuestions } from './data/quizQuestions';
 
-interface Slide {
-  id: string;
-  type: SlideType;
-  contentId: string;
-  title: string;
-}
-
 function App() {
   const [progress, setProgress] = useState<UserProgress>(getProgress());
-  const [slides, setSlides] = useState<Slide[]>([]);
+  const [slides, setSlides] = useState<Slide[]>([
+    {
+      id: 'home',
+      type: 'home',
+      contentId: 'home',
+      title: 'Home',
+    },
+  ]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [quizResults, setQuizResults] = useState<Array<{
     questionId: string;
     selectedOptionId: string;
   }> | null>(null);
-
-  useEffect(() => {
-    const initialSlides: Slide[] = [
-      {
-        id: 'home',
-        type: 'home',
-        contentId: 'home',
-        title: 'Home',
-      },
-    ];
-    setSlides(initialSlides);
-  }, []);
 
   const handleSelectLesson = (lessonId: string) => {
     const newSlides = [
@@ -65,7 +52,7 @@ function App() {
   };
 
   const handleStartQuiz = () => {
-    const questionIds = getRandomQuizQuestions(5);
+    const questionIds = getRandomQuizQuestions(QUIZ_QUESTION_COUNT);
     const newSlides = [
       ...slides,
       {
@@ -80,26 +67,29 @@ function App() {
   };
 
   const handleCompleteQuiz = (results: Array<{ questionId: string; selectedOptionId: string }>) => {
-    const correctCount = results.reduce((acc, result) => {
-      const question = quizQuestions.find(q => q.id === result.questionId);
-      const selectedOption = question?.options.find(o => o.id === result.selectedOptionId);
-      return acc + (selectedOption?.isCorrect ? 1 : 0);
-    }, 0);
+    // Single pass: compute correctCount and questionsAnswered together
+    const optionMap = new Map(
+      quizQuestions.flatMap(q => q.options.map(o => [o.id, o]))
+    );
+
+    let correctCount = 0;
+    const questionsAnswered = results.map(r => {
+      const selectedOption = optionMap.get(r.selectedOptionId);
+      const isCorrect = selectedOption?.isCorrect ?? false;
+      if (isCorrect) correctCount++;
+      return {
+        questionId: r.questionId,
+        selectedOptionId: r.selectedOptionId,
+        isCorrect,
+      };
+    });
 
     const proficiency = calculateProficiency(correctCount, results.length);
     const attemptId = `attempt-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
     const attempt = {
       id: attemptId,
-      questionsAnswered: results.map(r => {
-        const question = quizQuestions.find(q => q.id === r.questionId);
-        const selectedOption = question?.options.find(o => o.id === r.selectedOptionId);
-        return {
-          questionId: r.questionId,
-          selectedOptionId: r.selectedOptionId,
-          isCorrect: selectedOption?.isCorrect ?? false,
-        };
-      }),
+      questionsAnswered,
       score: correctCount,
       proficiency,
       timestamp: Date.now(),

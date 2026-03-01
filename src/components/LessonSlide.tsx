@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { Lesson } from '../types';
+import { useState, useEffect, useMemo } from 'react';
 import { CodeBlock } from './CodeBlock';
 import { lessons } from '../data/lessons';
 
@@ -9,10 +8,23 @@ interface LessonSlideProps {
 }
 
 export function LessonSlide({ lessonId, onComplete }: LessonSlideProps) {
-  const lesson = lessons.find(l => l.id === lessonId);
   const [currentSection, setCurrentSection] = useState(0);
 
-  if (!lesson) return null;
+  // Memoize lesson lookup to avoid O(n) search on every render
+  const lesson = useMemo(() => lessons.find(l => l.id === lessonId), [lessonId]);
+
+  // Reset current section when lesson changes (important because component is reused)
+  useEffect(() => {
+    setCurrentSection(0);
+  }, [lessonId]);
+
+  if (!lesson) {
+    return (
+      <div className="h-full flex items-center justify-center text-gray-600">
+        <p>Lesson not found</p>
+      </div>
+    );
+  }
 
   const section = lesson.sections[currentSection];
   const isLastSection = currentSection === lesson.sections.length - 1;

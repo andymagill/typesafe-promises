@@ -1,25 +1,45 @@
-import React, { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { quizQuestions } from '../data/quizQuestions';
-import { QuizQuestion } from '../types';
 
 interface QuizSlideProps {
   questionIds: string[];
   onComplete: (results: Array<{ questionId: string; selectedOptionId: string }>) => void;
 }
 
+/**
+ * Determines CSS classes for option button based on answer state
+ */
+function getOptionClassName(
+  optionId: string,
+  selectedOptionId: string | undefined,
+  showExplanation: boolean,
+  isCorrect: boolean
+): string {
+  if (selectedOptionId === optionId) {
+    if (isCorrect && showExplanation) return 'border-green-500 bg-green-50';
+    if (!isCorrect && showExplanation) return 'border-red-500 bg-red-50';
+    return 'border-blue-500 bg-blue-50';
+  }
+  if (showExplanation && isCorrect) return 'border-green-500 bg-green-50';
+  return 'border-gray-200 bg-white hover:border-gray-300';
+}
+
 export function QuizSlide({ questionIds, onComplete }: QuizSlideProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState<Map<string, string>>(new Map());
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [showExplanation, setShowExplanation] = useState(false);
 
   const currentQuestionId = questionIds[currentIndex];
-  const question = quizQuestions.find(q => q.id === currentQuestionId);
-  const selectedOptionId = answers.get(currentQuestionId);
+  const question = useMemo(
+    () => quizQuestions.find(q => q.id === currentQuestionId),
+    [currentQuestionId]
+  );
+  const selectedOptionId = answers[currentQuestionId];
 
   if (!question) return null;
 
   const handleSelectOption = (optionId: string) => {
-    setAnswers(new Map(answers).set(currentQuestionId, optionId));
+    setAnswers(prev => ({ ...prev, [currentQuestionId]: optionId }));
     setShowExplanation(false);
   };
 
@@ -34,9 +54,15 @@ export function QuizSlide({ questionIds, onComplete }: QuizSlideProps) {
       setCurrentIndex(i => i + 1);
       setShowExplanation(false);
     } else {
+      // Validate all questions have answers before completing
+      const allAnswered = questionIds.every(qId => answers[qId]);
+      if (!allAnswered) {
+        alert('Please answer all questions before submitting.');
+        return;
+      }
       const results = questionIds.map(qId => ({
         questionId: qId,
-        selectedOptionId: answers.get(qId) || '',
+        selectedOptionId: answers[qId],
       }));
       onComplete(results);
     }
@@ -73,29 +99,24 @@ export function QuizSlide({ questionIds, onComplete }: QuizSlideProps) {
         </div>
 
         <div className="space-y-3 mb-8">
-          {question.options.map(option => (
-            <button
-              key={option.id}
-              onClick={() => !showExplanation && handleSelectOption(option.id)}
-              disabled={showExplanation}
-              className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
-                selectedOptionId === option.id
-                  ? isCorrect && showExplanation
-                    ? 'border-green-500 bg-green-50'
-                    : !isCorrect && showExplanation
-                      ? 'border-red-500 bg-red-50'
-                      : 'border-blue-500 bg-blue-50'
-                  : showExplanation && option.isCorrect
-                    ? 'border-green-500 bg-green-50'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
-              }`}
-            >
-              <p className="font-medium text-gray-900">{option.text}</p>
-              {selectedOptionId === option.id && showExplanation && (
-                <p className="text-sm mt-2 text-gray-700">{option.explanation}</p>
-              )}
-            </button>
-          ))}
+          {question.options.map(option => {
+            const isCorrect = option.isCorrect;
+            return (
+              <button
+                key={option.id}
+                onClick={() => !showExplanation && handleSelectOption(option.id)}
+                disabled={showExplanation}
+                className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
+                  getOptionClassName(option.id, selectedOptionId, showExplanation, isCorrect)
+                }`}
+              >
+                <p className="font-medium text-gray-900">{option.text}</p>
+                {selectedOptionId === option.id && showExplanation && (
+                  <p className="text-sm mt-2 text-gray-700">{option.explanation}</p>
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {showExplanation && (
@@ -105,6 +126,8 @@ export function QuizSlide({ questionIds, onComplete }: QuizSlideProps) {
                 ? 'bg-green-50 border-2 border-green-200'
                 : 'bg-red-50 border-2 border-red-200'
             }`}
+            role="alert"
+            aria-live="polite"
           >
             <p
               className={`font-semibold mb-2 ${
