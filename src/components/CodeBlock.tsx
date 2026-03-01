@@ -1,5 +1,7 @@
 import { Copy, Check } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface CodeBlockProps {
   code: string;
@@ -37,7 +39,7 @@ export function CodeBlock({ code, language = 'typescript' }: CodeBlockProps) {
   };
 
   return (
-    <div className="relative bg-gray-900 rounded-lg overflow-hidden shadow-lg animate-codeSlide">
+    <div className="relative rounded-lg overflow-hidden shadow-lg animate-codeSlide">
       <button
         onClick={handleCopy}
         className="absolute top-4 right-4 p-2 hover:bg-gray-800 rounded-lg transition-colors z-10"
@@ -51,11 +53,20 @@ export function CodeBlock({ code, language = 'typescript' }: CodeBlockProps) {
         )}
       </button>
 
-      <pre className="p-6 pt-12 overflow-x-auto">
-        <code className={`language-${language} text-gray-100 text-sm leading-relaxed font-mono`}>
-          {code}
-        </code>
-      </pre>
+      <SyntaxHighlighter
+        language={language}
+        style={vscDarkPlus}
+        customStyle={{
+          margin: 0,
+          padding: '1.5rem 1.5rem 1.5rem 1.5rem',
+          paddingTop: '3rem',
+          fontSize: '0.875rem',
+          lineHeight: '1.625',
+          overflow: 'auto',
+        }}
+      >
+        {code}
+      </SyntaxHighlighter>
     </div>
   );
 }
