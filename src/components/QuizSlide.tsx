@@ -3,6 +3,8 @@ import { quizQuestions } from '../data/quizQuestions';
 
 interface QuizSlideProps {
   questionIds: string[];
+  currentIndex: number;
+  onIndexChange: (index: number) => void;
   onComplete: (results: Array<{ questionId: string; selectedOptionId: string }>) => void;
 }
 
@@ -24,8 +26,12 @@ function getOptionClassName(
   return 'border-gray-200 bg-white hover:border-gray-300';
 }
 
-export function QuizSlide({ questionIds, onComplete }: QuizSlideProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+export function QuizSlide({
+  questionIds,
+  currentIndex,
+  onIndexChange,
+  onComplete,
+}: QuizSlideProps) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [showExplanation, setShowExplanation] = useState(false);
 
@@ -51,7 +57,7 @@ export function QuizSlide({ questionIds, onComplete }: QuizSlideProps) {
 
   const handleNext = () => {
     if (currentIndex < questionIds.length - 1) {
-      setCurrentIndex(i => i + 1);
+      onIndexChange(currentIndex + 1);
       setShowExplanation(false);
     } else {
       // Validate all questions have answers before completing
@@ -70,7 +76,7 @@ export function QuizSlide({ questionIds, onComplete }: QuizSlideProps) {
 
   const handlePrevious = () => {
     if (currentIndex > 0) {
-      setCurrentIndex(i => i - 1);
+      onIndexChange(currentIndex - 1);
       setShowExplanation(false);
     }
   };

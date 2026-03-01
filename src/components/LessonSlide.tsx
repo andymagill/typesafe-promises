@@ -1,22 +1,22 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { CodeBlock } from './CodeBlock';
 import { lessons } from '../data/lessons';
 
 interface LessonSlideProps {
   lessonId: string;
+  currentSection: number;
+  onSectionChange: (index: number) => void;
   onComplete: (lessonId: string) => void;
 }
 
-export function LessonSlide({ lessonId, onComplete }: LessonSlideProps) {
-  const [currentSection, setCurrentSection] = useState(0);
-
+export function LessonSlide({
+  lessonId,
+  currentSection,
+  onSectionChange,
+  onComplete,
+}: LessonSlideProps) {
   // Memoize lesson lookup to avoid O(n) search on every render
   const lesson = useMemo(() => lessons.find(l => l.id === lessonId), [lessonId]);
-
-  // Reset current section when lesson changes (important because component is reused)
-  useEffect(() => {
-    setCurrentSection(0);
-  }, [lessonId]);
 
   if (!lesson) {
     return (
@@ -33,13 +33,13 @@ export function LessonSlide({ lessonId, onComplete }: LessonSlideProps) {
     if (isLastSection) {
       onComplete(lessonId);
     } else {
-      setCurrentSection(s => s + 1);
+      onSectionChange(currentSection + 1);
     }
   };
 
   const handlePrevious = () => {
     if (currentSection > 0) {
-      setCurrentSection(s => s - 1);
+      onSectionChange(currentSection - 1);
     }
   };
 

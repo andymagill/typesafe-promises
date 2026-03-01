@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { HomeSlide } from './components/HomeSlide';
 import { LessonSlide } from './components/LessonSlide';
 import { QuizSlide } from './components/QuizSlide';
 import { ResultsSlide } from './components/ResultsSlide';
-import { SlideNavigation } from './components/SlideNavigation';
 import { UserProgress, Slide, SlideType, QUIZ_QUESTION_COUNT } from './types';
 import {
   getProgress,
@@ -25,10 +24,46 @@ function App() {
     },
   ]);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [lessonSectionIndex, setLessonSectionIndex] = useState(0);
+  const [quizQuestionIndex, setQuizQuestionIndex] = useState(0);
   const [quizResults, setQuizResults] = useState<Array<{
     questionId: string;
     selectedOptionId: string;
   }> | null>(null);
+
+  // Initialize history on mount
+  useEffect(() => {
+    window.history.replaceState(
+      { currentSlide: 0, lessonSectionIndex: 0, quizQuestionIndex: 0 },
+      '',
+      '#/home'
+    );
+
+    const handlePopState = (event: PopStateEvent) => {
+      const state = event.state as {
+        currentSlide: number;
+        lessonSectionIndex: number;
+        quizQuestionIndex: number;
+      } | null;
+      if (state) {
+        setCurrentSlide(state.currentSlide);
+        setLessonSectionIndex(state.lessonSectionIndex);
+        setQuizQuestionIndex(state.quizQuestionIndex);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Helper to push history state
+  const pushHistory = (hash: string) => {
+    window.history.pushState(
+      { currentSlide, lessonSectionIndex, quizQuestionIndex },
+      '',
+      hash
+    );
+  };
 
   const handleSelectLesson = (lessonId: string) => {
     const newSlides = [
@@ -42,6 +77,12 @@ function App() {
     ];
     setSlides(newSlides);
     setCurrentSlide(newSlides.length - 1);
+    setLessonSectionIndex(0);
+    window.history.pushState(
+      { currentSlide: newSlides.length - 1, lessonSectionIndex: 0, quizQuestionIndex: 0 },
+      '',
+      `#/lesson/${lessonId}/0`
+    );
   };
 
   const handleCompleteLesson = (lessonId: string) => {
@@ -63,6 +104,12 @@ function App() {
     ];
     setSlides(newSlides);
     setCurrentSlide(newSlides.length - 1);
+    setQuizQuestionIndex(0);
+    window.history.pushState(
+      { currentSlide: newSlides.length - 1, lessonSectionIndex: 0, quizQuestionIndex: 0 },
+      '',
+      '#/quiz/0'
+    );
   };
 
   const handleCompleteQuiz = (results: Array<{ questionId: string; selectedOptionId: string }>) => {
@@ -110,6 +157,11 @@ function App() {
     ];
     setSlides(newSlides);
     setCurrentSlide(newSlides.length - 1);
+    window.history.pushState(
+      { currentSlide: newSlides.length - 1, lessonSectionIndex: 0, quizQuestionIndex: 0 },
+      '',
+      '#/results'
+    );
   };
 
   const handleRetakeQuiz = () => {
@@ -128,7 +180,14 @@ function App() {
       },
     ]);
     setCurrentSlide(0);
+    setLessonSectionIndex(0);
+    setQuizQuestionIndex(0);
     setQuizResults(null);
+    window.history.replaceState(
+      { currentSlide: 0, lessonSectionIndex: 0, quizQuestionIndex: 0 },
+      '',
+      '#/home'
+    );
   };
 
   const handleResetProgress = () => {
@@ -137,21 +196,28 @@ function App() {
     setCurrentSlide(0);
   };
 
-  const handleNext = () => {
-    if (currentSlide < slides.length - 1) {
-      setCurrentSlide(currentSlide + 1);
+  const handleLessonSectionChange = (newIndex: number) => {
+    const slide = slides[currentSlide];
+    if (slide.type === 'lesson') {
+      setLessonSectionIndex(newIndex);
+      window.history.pushState(
+        { currentSlide, lessonSectionIndex: newIndex, quizQuestionIndex: 0 },
+        '',
+        `#/lesson/${slide.contentId}/${newIndex}`
+      );
     }
   };
 
-  const handlePrevious = () => {
-    if (currentSlide > 0) {
-      setCurrentSlide(currentSlide - 1);
-    }
+  const handleQuizQuestionChange = (newIndex: number) => {
+    setQuizQuestionIndex(newIndex);
+    window.history.pushState(
+      { currentSlide, lessonSectionIndex: 0, quizQuestionIndex: newIndex },
+      '',
+      `#/quiz/${newIndex}`
+    );
   };
 
   const slide = slides[currentSlide];
-  const canNext = currentSlide < slides.length - 1;
-  const canPrevious = currentSlide > 0;
 
   if (!slide) {
     return (
@@ -176,7 +242,12 @@ function App() {
 
       {slide.type === 'lesson' && (
         <div className="absolute inset-0 animate-fadeIn">
-          <LessonSlide lessonId={slide.contentId} onComplete={handleCompleteLesson} />
+          <LessonSlide
+            lessonId={slide.contentId}
+            currentSection={lessonSectionIndex}
+            onSectionChange={handleLessonSectionChange}
+            onComplete={handleCompleteLesson}
+          />
         </div>
       )}
 
@@ -184,6 +255,8 @@ function App() {
         <div className="absolute inset-0 animate-fadeIn">
           <QuizSlide
             questionIds={slide.contentId.split(',')}
+            currentIndex={quizQuestionIndex}
+            onIndexChange={handleQuizQuestionChange}
             onComplete={handleCompleteQuiz}
           />
         </div>
@@ -198,15 +271,6 @@ function App() {
           />
         </div>
       )}
-
-      <SlideNavigation
-        currentSlide={currentSlide}
-        totalSlides={slides.length}
-        onPrevious={handlePrevious}
-        onNext={handleNext}
-        canPrevious={canPrevious}
-        canNext={canNext}
-      />
     </div>
   );
 }
