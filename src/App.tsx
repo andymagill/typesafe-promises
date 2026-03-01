@@ -33,10 +33,11 @@ function App() {
 
   // Initialize history on mount
   useEffect(() => {
+    // Initialize with home state without changing URL
     window.history.replaceState(
       { currentSlide: 0, lessonSectionIndex: 0, quizQuestionIndex: 0 },
       '',
-      '#/home'
+      window.location.pathname
     );
 
     const handlePopState = (event: PopStateEvent) => {
@@ -186,7 +187,7 @@ function App() {
     window.history.replaceState(
       { currentSlide: 0, lessonSectionIndex: 0, quizQuestionIndex: 0 },
       '',
-      '#/home'
+      window.location.pathname
     );
   };
 
