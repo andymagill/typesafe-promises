@@ -14,6 +14,7 @@ import {
   resetProgress,
 } from './utils/storage';
 import { getRandomQuizQuestions, calculateProficiency } from './utils/randomization';
+import { quizQuestions } from './data/quizQuestions';
 
 interface Slide {
   id: string;
@@ -44,16 +45,17 @@ function App() {
   }, []);
 
   const handleSelectLesson = (lessonId: string) => {
-    setSlides(current => [
-      ...current,
+    const newSlides = [
+      ...slides,
       {
         id: `lesson-${lessonId}`,
-        type: 'lesson',
+        type: 'lesson' as SlideType,
         contentId: lessonId,
         title: 'Lesson',
       },
-    ]);
-    setCurrentSlide(slides.length);
+    ];
+    setSlides(newSlides);
+    setCurrentSlide(newSlides.length - 1);
   };
 
   const handleCompleteLesson = (lessonId: string) => {
@@ -64,26 +66,23 @@ function App() {
 
   const handleStartQuiz = () => {
     const questionIds = getRandomQuizQuestions(5);
-    setSlides(current => [
-      ...current,
+    const newSlides = [
+      ...slides,
       {
         id: `quiz-${Date.now()}`,
-        type: 'quiz',
+        type: 'quiz' as SlideType,
         contentId: questionIds.join(','),
         title: 'Quiz',
       },
-    ]);
-    setCurrentSlide(slides.length);
+    ];
+    setSlides(newSlides);
+    setCurrentSlide(newSlides.length - 1);
   };
 
   const handleCompleteQuiz = (results: Array<{ questionId: string; selectedOptionId: string }>) => {
     const correctCount = results.reduce((acc, result) => {
-      const question = require('./data/quizQuestions').quizQuestions.find(
-        (q: any) => q.id === result.questionId
-      );
-      const selectedOption = question?.options.find(
-        (o: any) => o.id === result.selectedOptionId
-      );
+      const question = quizQuestions.find(q => q.id === result.questionId);
+      const selectedOption = question?.options.find(o => o.id === result.selectedOptionId);
       return acc + (selectedOption?.isCorrect ? 1 : 0);
     }, 0);
 
@@ -93,10 +92,8 @@ function App() {
     const attempt = {
       id: attemptId,
       questionsAnswered: results.map(r => {
-        const question = require('./data/quizQuestions').quizQuestions.find(
-          (q: any) => q.id === r.questionId
-        );
-        const selectedOption = question?.options.find((o: any) => o.id === r.selectedOptionId);
+        const question = quizQuestions.find(q => q.id === r.questionId);
+        const selectedOption = question?.options.find(o => o.id === r.selectedOptionId);
         return {
           questionId: r.questionId,
           selectedOptionId: r.selectedOptionId,
@@ -113,16 +110,17 @@ function App() {
     setProgress(updated);
     setQuizResults(results);
 
-    setSlides(current => [
-      ...current,
+    const newSlides = [
+      ...slides,
       {
         id: `results-${Date.now()}`,
-        type: 'results',
+        type: 'results' as SlideType,
         contentId: attemptId,
         title: 'Results',
       },
-    ]);
-    setCurrentSlide(slides.length);
+    ];
+    setSlides(newSlides);
+    setCurrentSlide(newSlides.length - 1);
   };
 
   const handleRetakeQuiz = () => {
