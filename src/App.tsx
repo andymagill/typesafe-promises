@@ -3,7 +3,6 @@ import { HomeSlide } from './components/HomeSlide';
 import { LessonSlide } from './components/LessonSlide';
 import { QuizSlide } from './components/QuizSlide';
 import { ResultsSlide } from './components/ResultsSlide';
-import { SlideContainer } from './components/SlideContainer';
 import { SlideNavigation } from './components/SlideNavigation';
 import { UserProgress, Slide, SlideType, QUIZ_QUESTION_COUNT } from './types';
 import {
@@ -119,6 +118,15 @@ function App() {
   };
 
   const handleBackHome = () => {
+    // Reset to home slide only (bounded slides array)
+    setSlides([
+      {
+        id: 'home',
+        type: 'home',
+        contentId: 'home',
+        title: 'Home',
+      },
+    ]);
     setCurrentSlide(0);
     setQuizResults(null);
   };
@@ -155,35 +163,41 @@ function App() {
 
   return (
     <div className="relative h-screen bg-white overflow-hidden">
-      <SlideContainer isVisible={slide.type === 'home'}>
-        <HomeSlide
-          progress={progress}
-          onSelectLesson={handleSelectLesson}
-          onStartQuiz={handleStartQuiz}
-          onResetProgress={handleResetProgress}
-        />
-      </SlideContainer>
+      {slide.type === 'home' && (
+        <div className="absolute inset-0 animate-fadeIn">
+          <HomeSlide
+            progress={progress}
+            onSelectLesson={handleSelectLesson}
+            onStartQuiz={handleStartQuiz}
+            onResetProgress={handleResetProgress}
+          />
+        </div>
+      )}
 
-      <SlideContainer isVisible={slide.type === 'lesson'}>
-        <LessonSlide lessonId={slide.contentId} onComplete={handleCompleteLesson} />
-      </SlideContainer>
+      {slide.type === 'lesson' && (
+        <div className="absolute inset-0 animate-fadeIn">
+          <LessonSlide lessonId={slide.contentId} onComplete={handleCompleteLesson} />
+        </div>
+      )}
 
-      <SlideContainer isVisible={slide.type === 'quiz'}>
-        <QuizSlide
-          questionIds={slide.contentId.split(',')}
-          onComplete={handleCompleteQuiz}
-        />
-      </SlideContainer>
+      {slide.type === 'quiz' && (
+        <div className="absolute inset-0 animate-fadeIn">
+          <QuizSlide
+            questionIds={slide.contentId.split(',')}
+            onComplete={handleCompleteQuiz}
+          />
+        </div>
+      )}
 
-      <SlideContainer isVisible={slide.type === 'results'}>
-        {quizResults && (
+      {slide.type === 'results' && quizResults && (
+        <div className="absolute inset-0 animate-fadeIn">
           <ResultsSlide
             results={quizResults}
             onRetakeQuiz={handleRetakeQuiz}
             onBackHome={handleBackHome}
           />
-        )}
-      </SlideContainer>
+        </div>
+      )}
 
       <SlideNavigation
         currentSlide={currentSlide}
