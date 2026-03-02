@@ -57,15 +57,6 @@ function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Helper to push history state
-  const pushHistory = (hash: string) => {
-    window.history.pushState(
-      { currentSlide, lessonSectionIndex, quizQuestionIndex },
-      '',
-      hash
-    );
-  };
-
   const handleSelectLesson = (lessonId: string) => {
     const newSlides = [
       ...slides,

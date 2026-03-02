@@ -48,7 +48,7 @@ export function HomeSlide({
       </div>
 
       <div className="max-w-6xl mx-auto px-8 py-16">
-        <div className="grid grid-cols-3 gap-6 mb-16">
+        <div className="grid grid-cols-1 xs:grid-cols-3 gap-6 mb-16">
           <div className="bg-white rounded-lg p-6 shadow-md border-l-4 border-blue-600 animate-slideInLeft">
             <BookOpen size={32} className="text-blue-600 mb-4" />
             <p className="text-3xl font-bold text-gray-900">{progress.completedLessons.length}</p>
@@ -89,7 +89,7 @@ export function HomeSlide({
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-6">
             {lessons.map(lesson => {
               const isCompleted = completedSet.has(lesson.id);
               const isUnlocked = lesson.prerequisites.every(p => completedSet.has(p));

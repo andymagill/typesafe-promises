@@ -122,8 +122,6 @@ export function ResultsSlide({ results, onRetakeQuiz, onBackHome }: ResultsSlide
           <div className="space-y-8">
             {questionResults.map((qResult, idx) => {
               const { question, userAnswered, isCorrect } = qResult;
-              const userAnswer = optionMap.get(userAnswered);
-              const correctOption = question.options.find(o => o.isCorrect);
 
               return (
                 <div
