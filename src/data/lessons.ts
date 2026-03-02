@@ -93,6 +93,23 @@ fetchData
   });`,
       },
     ],
+    resources: [
+      {
+        title: 'MDN: Promise',
+        url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise',
+        description: 'Complete documentation on Promises from Mozilla Developer Network',
+      },
+      {
+        title: 'MDN: Promise.prototype.then()',
+        url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/then',
+        description: 'Detailed guide on the then() method and Promise chaining',
+      },
+      {
+        title: 'JavaScript.info: Promises',
+        url: 'https://javascript.info/promise-basics',
+        description: 'Interactive guide to Promise fundamentals',
+      },
+    ],
   },
   {
     id: 'generic-syntax',
@@ -177,6 +194,23 @@ const finalPromise: Promise<boolean> = stringPromise
     console.log(str);
     return str.length > 5; // returns boolean
   });`,
+      },
+    ],
+    resources: [
+      {
+        title: 'TypeScript Handbook: Generics',
+        url: 'https://www.typescriptlang.org/docs/handbook/2/generics.html',
+        description: 'Official TypeScript guide to understanding and using generics',
+      },
+      {
+        title: 'TypeScript Deep Dive: Generics',
+        url: 'https://basarat.gitbook.io/typescript/type-system/generics',
+        description: 'In-depth exploration of TypeScript generics',
+      },
+      {
+        title: 'MDN: Promise Type Parameters',
+        url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#description',
+        description: 'Promise documentation covering type parameters',
       },
     ],
   },
@@ -272,6 +306,23 @@ fetchData().catch((error) => {
 });`,
       },
     ],
+    resources: [
+      {
+        title: 'TypeScript Handbook: Narrowing Type Guards',
+        url: 'https://www.typescriptlang.org/docs/handbook/2/narrowing.html',
+        description: 'Learn type narrowing techniques including instanceof and typeof checks',
+      },
+      {
+        title: 'MDN: Error Object',
+        url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error',
+        description: 'Documentation on JavaScript Error objects and error handling',
+      },
+      {
+        title: 'TypeScript 4.0: unknown Type',
+        url: 'https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-0.html#new-unknown-top-type',
+        description: 'Introduction of the unknown type and its advantages over any',
+      },
+    ],
   },
   {
     id: 'advanced-composition',
@@ -356,6 +407,28 @@ async function processData() {
     throw error;
   }
 }`,
+      },
+    ],
+    resources: [
+      {
+        title: 'MDN: Promise.all()',
+        url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all',
+        description: 'Comprehensive guide to Promise.all() and parallel Promise composition',
+      },
+      {
+        title: 'MDN: async/await',
+        url: 'https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Promises',
+        description: 'Learn async/await syntax and how to work with Promises',
+      },
+      {
+        title: 'TypeScript Handbook: async/await',
+        url: 'https://www.typescriptlang.org/docs/handbook/release-notes/typescript-1-7.html#asyncawait',
+        description: 'TypeScript async/await implementation and type safety',
+      },
+      {
+        title: 'MDN: Promise Combinators',
+        url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#promise_concurrency',
+        description: 'Advanced Promise methods like Promise.race() and Promise.allSettled()',
       },
     ],
   },

@@ -41,6 +41,12 @@ export interface Lesson {
   }>;
   /** Estimated time to complete lesson in minutes */
   estimatedTimeMinutes: number;
+  /** External resources and documentation links */
+  resources?: Array<{
+    title: string;
+    url: string;
+    description?: string;
+  }>;
 }
 
 export interface QuizOption {

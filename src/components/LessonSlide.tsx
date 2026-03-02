@@ -77,6 +77,30 @@ export function LessonSlide({
             </div>
           )}
 
+          {isLastSection && lesson.resources && lesson.resources.length > 0 && (
+            <div className="mt-12 pt-12 border-t-2 border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">Further Reading</h3>
+              <div className="space-y-4">
+                {lesson.resources.map((resource, idx) => (
+                  <div key={idx} className="flex flex-col">
+                    <a
+                      href={resource.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 hover:underline font-medium text-base"
+                    >
+                      {resource.title}
+                      <span className="ml-2 text-xs">↗</span>
+                    </a>
+                    {resource.description && (
+                      <p className="text-gray-600 text-sm mt-1">{resource.description}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex gap-4 mt-12">
             <button
               onClick={handlePrevious}
