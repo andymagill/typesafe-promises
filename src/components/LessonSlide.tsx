@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { CodeBlock } from './CodeBlock';
 import { lessons } from '../data/lessons';
+import { Footer } from './Footer';
 
 interface LessonSlideProps {
   lessonId: string;
@@ -118,6 +119,8 @@ export function LessonSlide({
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }

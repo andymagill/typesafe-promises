@@ -54,7 +54,8 @@ src/
 │   ├── QuizSlide.tsx        # Quiz question & answer logic
 │   ├── ResultsSlide.tsx     # Quiz results & recommendations
 │   ├── SlideNavigation.tsx  # Previous/Next buttons & dots
-│   └── CodeBlock.tsx        # Code display with copy button
+│   ├── CodeBlock.tsx        # Code display with copy button
+│   └── Footer.tsx           # 2-column footer with license & creator credit
 ├── data/
 │   ├── lessons.ts          # Curriculum data
 │   └── quizQuestions.ts    # Question bank
@@ -238,6 +239,16 @@ When adding features or fixing bugs:
 3. **Validation** — Input validation before state updates
 4. **Error Handling** — Try/catch for APIs, error boundaries for rendering
 5. **Immutability** — Use spread operators, not mutations
+
+---
+
+## 📄 License
+
+This project is licensed under the [Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/) license.
+
+You are free to share and adapt the material for any purpose, even commercially, as long as you give appropriate credit and distribute your contributions under the same license.
+
+Coded with ♥ by [Andrew Magill](https://magill.dev)
 
 ---
 

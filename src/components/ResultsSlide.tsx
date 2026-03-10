@@ -4,6 +4,7 @@ import { calculateProficiency, getProficiencyLevel } from '../utils/randomizatio
 import { PROFICIENCY_THRESHOLDS } from '../types';
 import { Award, AlertTriangle, BookOpen } from 'lucide-react';
 import { CodeBlock } from './CodeBlock';
+import { Footer } from './Footer';
 
 interface ResultsSlideProps {
   results: Array<{ questionId: string; selectedOptionId: string }>;
@@ -263,6 +264,8 @@ export function ResultsSlide({ results, onRetakeQuiz, onBackHome }: ResultsSlide
           </button>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }

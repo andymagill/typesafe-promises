@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { quizQuestions } from '../data/quizQuestions';
+import { Footer } from './Footer';
 
 interface QuizSlideProps {
   questionIds: string[];
@@ -176,6 +177,8 @@ export function QuizSlide({
           )}
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }

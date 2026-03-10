@@ -1,5 +1,6 @@
 import { lessons } from '../data/lessons';
 import { BookOpen, Award, ArrowRight, RotateCcw } from 'lucide-react';
+import { Footer } from './Footer';
 import { UserProgress } from '../types';
 
 interface HomeSlideProps {
@@ -139,6 +140,8 @@ export function HomeSlide({
           <ArrowRight size={20} />
         </button>
       </div>
+
+      <Footer />
     </div>
   );
 }

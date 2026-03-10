@@ -367,6 +367,23 @@ Component Local (QuizSlide.tsx):
 
 ---
 
+## Footer Component
+
+`Footer.tsx` renders a 2-column responsive footer at the bottom of every slide's scrollable content area.
+
+**Left column:** CC BY-SA 4.0 license attribution with a link to the license deed.
+
+**Right column:** Creator credit ("Coded with ♥ by Andrew Magill") and an inline list of "Other Stuff" links.
+
+**Design decisions:**
+- Scrolls with content (not fixed) — visible when the user reaches the bottom of a slide
+- Embedded inside each slide component rather than at the App level, preserving the conditional mounting pattern (E-1)
+- `otherStuffLinks` is a simple array constant at the top of `Footer.tsx` — easy to update without touching JSX
+- Uses the `Heart` icon from `lucide-react` (already a project dependency) for the filled heart symbol
+- Responsive: 2-column grid on `sm` and above, single column on mobile
+
+---
+
 ## Next Steps for Improvement
 
 1. **Replace discriminated union** with proper type-safe slide discriminant
