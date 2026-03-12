@@ -87,7 +87,7 @@ export function QuizSlide({
   const isCorrect = selectedOption?.isCorrect ?? false;
 
   return (
-    <div className="h-full overflow-y-auto pb-32">
+    <div className="h-full overflow-y-auto">
       <div className="max-w-4xl mx-auto px-8 py-12">
         <div className="mb-8">
           <span className="text-sm font-semibold text-blue-600 uppercase tracking-wide">
