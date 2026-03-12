@@ -80,6 +80,26 @@ function App() {
   const handleCompleteLesson = (lessonId: string) => {
     const updated = completeLesson(lessonId);
     setProgress(updated);
+    
+    // Navigate to quiz with questions related to the completed lesson
+    const questionIds = getAdaptiveQuizQuestions(updated, QUIZ_QUESTION_COUNT);
+    const newSlides = [
+      ...slides,
+      {
+        id: `quiz-${Date.now()}`,
+        type: 'quiz' as SlideType,
+        contentId: questionIds.join(','),
+        title: 'Quiz',
+      },
+    ];
+    setSlides(newSlides);
+    setCurrentSlide(newSlides.length - 1);
+    setQuizQuestionIndex(0);
+    window.history.pushState(
+      { currentSlide: newSlides.length - 1, lessonSectionIndex: 0, quizQuestionIndex: 0 },
+      '',
+      '#/quiz/0'
+    );
   };
 
   const handleStartQuiz = () => {
