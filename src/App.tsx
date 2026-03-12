@@ -13,6 +13,13 @@ import {
 import { getAdaptiveQuizQuestions, calculateProficiency } from './utils/randomization';
 import { quizQuestions } from './data/quizQuestions';
 
+/**
+ * Main application component that manages the learning flow:
+ * Home → Lesson → Quiz → Results
+ * 
+ * Handles navigation between slides, tracks user progress (lessons completed, quiz attempts),
+ * and manages browser history for back/forward button support.
+ */
 function App() {
   const [progress, setProgress] = useState<UserProgress>(getProgress());
   const [slides, setSlides] = useState<Slide[]>([
@@ -57,6 +64,10 @@ function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  /**
+   * Navigates to a lesson when user selects one from the home slide.
+   * Creates a new lesson slide, resets the section index, and updates browser history.
+   */
   const handleSelectLesson = (lessonId: string) => {
     const newSlides = [
       ...slides,
@@ -77,6 +88,11 @@ function App() {
     );
   };
 
+  /**
+   * Called when user completes a lesson by clicking "Complete Lesson" button.
+   * Marks the lesson as completed in storage, then automatically navigates to a quiz.
+   * Quiz questions are adaptively selected based on the completed lesson.
+   */
   const handleCompleteLesson = (lessonId: string) => {
     const updated = completeLesson(lessonId);
     setProgress(updated);
@@ -102,6 +118,11 @@ function App() {
     );
   };
 
+  /**
+   * Navigates to a quiz from the home slide.
+   * Selects adaptive quiz questions based on user's completed lessons and progress.
+   * Creates a new quiz slide and resets the question index.
+   */
   const handleStartQuiz = () => {
     const questionIds = getAdaptiveQuizQuestions(progress, QUIZ_QUESTION_COUNT);
     const newSlides = [
@@ -123,6 +144,11 @@ function App() {
     );
   };
 
+  /**
+   * Called when user completes the quiz by answering all questions.
+   * Calculates proficiency score, records the attempt in storage, and navigates to results.
+   * Maps selected option IDs to determine correct/incorrect answers.
+   */
   const handleCompleteQuiz = (results: Array<{ questionId: string; selectedOptionId: string }>) => {
     // Single pass: compute correctCount and questionsAnswered together
     const optionMap = new Map(
@@ -175,11 +201,19 @@ function App() {
     );
   };
 
+  /**
+   * Allows user to retake the quiz from the results slide.
+   * Clears previous results and starts a new quiz with different adaptive questions.
+   */
   const handleRetakeQuiz = () => {
     setQuizResults(null);
     handleStartQuiz();
   };
 
+  /**
+   * Resets the application to the home slide.
+   * Clears all slides, progress, and quiz results, returning to initial state.
+   */
   const handleBackHome = () => {
     // Reset to home slide only (bounded slides array)
     setSlides([
@@ -201,12 +235,21 @@ function App() {
     );
   };
 
+  /**
+   * Clears all user progress from storage (completed lessons and quiz attempts).
+   * Resets the application to the home slide with fresh state.
+   */
   const handleResetProgress = () => {
     resetProgress();
     setProgress(getProgress());
     setCurrentSlide(0);
   };
 
+  /**
+   * Updates the current section when user navigates within a lesson.
+   * Only updates if the current slide is a lesson slide.
+   * Updates browser history to maintain back/forward navigation.
+   */
   const handleLessonSectionChange = (newIndex: number) => {
     const slide = slides[currentSlide];
     if (slide.type === 'lesson') {
@@ -219,6 +262,10 @@ function App() {
     }
   };
 
+  /**
+   * Updates the current quiz question index when user navigates within a quiz.
+   * Updates browser history to maintain back/forward navigation.
+   */
   const handleQuizQuestionChange = (newIndex: number) => {
     setQuizQuestionIndex(newIndex);
     window.history.pushState(
@@ -228,6 +275,7 @@ function App() {
     );
   };
 
+  // Get the current slide to render based on the slide stack
   const slide = slides[currentSlide];
 
   if (!slide) {
@@ -238,6 +286,7 @@ function App() {
     );
   }
 
+  // Render the current slide based on its type (home, lesson, quiz, or results)
   return (
     <div className="relative h-screen bg-white overflow-hidden">
       {slide.type === 'home' && (
