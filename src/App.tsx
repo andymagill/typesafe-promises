@@ -10,7 +10,7 @@ import {
   addQuizAttempt,
   resetProgress,
 } from './utils/storage';
-import { getRandomQuizQuestions, calculateProficiency } from './utils/randomization';
+import { getAdaptiveQuizQuestions, calculateProficiency } from './utils/randomization';
 import { quizQuestions } from './data/quizQuestions';
 
 function App() {
@@ -80,11 +80,10 @@ function App() {
   const handleCompleteLesson = (lessonId: string) => {
     const updated = completeLesson(lessonId);
     setProgress(updated);
-    handleNext();
   };
 
   const handleStartQuiz = () => {
-    const questionIds = getRandomQuizQuestions(QUIZ_QUESTION_COUNT);
+    const questionIds = getAdaptiveQuizQuestions(progress, QUIZ_QUESTION_COUNT);
     const newSlides = [
       ...slides,
       {

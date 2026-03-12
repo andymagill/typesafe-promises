@@ -238,7 +238,7 @@ export function ResultsSlide({ results, onRetakeQuiz, onBackHome }: ResultsSlide
                       </p>
                     </div>
                     <CodeBlock
-                      code={sectionWithCode.codeExample}
+                      code={sectionWithCode.codeExample || ''}
                       language="typescript"
                     />
                   </div>

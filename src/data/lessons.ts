@@ -23,6 +23,9 @@ Key benefits:
         codeExample: `// Creating a simple Promise
 const myPromise = new Promise((resolve, reject) => {
   const success = true;
+  
+  // Do something asynchronous here
+   
   if (success) {
     resolve('Operation successful!');
   } else {
@@ -92,6 +95,33 @@ fetchData
     console.error('Error occurred:', error);
   });`,
       },
+      {
+        id: 'intro-4',
+        title: 'Real-World Example: Fetching Data',
+        content: `The fetch() API is a real-world use of Promises. It fetches resources from a server and returns a Promise that resolves with a Response object.
+
+Fetch is commonly chained with .then() to:
+1. Call fetch() to retrieve data
+2. Use .then() to parse the response (e.g., .json())
+3. Use another .then() to process the data
+4. Use .catch() to handle network errors`,
+        codeExample: `// Real-world Promise chain with fetch()
+fetch('https://api.example.com/users/1')
+  .then(response => {
+    // response is a Response object
+    // .json() returns a Promise that resolves to the parsed JSON
+    return response.json();
+  })
+  .then(data => {
+    // data is now the parsed JavaScript object
+    console.log('User:', data.name);
+    return data;
+  })
+  .catch(error => {
+    // Handles network errors or JSON parsing errors
+    console.error('Failed to fetch user:', error);
+  });`,
+      },
     ],
     resources: [
       {
@@ -108,6 +138,11 @@ fetchData
         title: 'JavaScript.info: Promises',
         url: 'https://javascript.info/promise-basics',
         description: 'Interactive guide to Promise fundamentals',
+      },
+      {
+        title: 'MDN: Fetch API',
+        url: 'https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API',
+        description: 'Learn how the Fetch API uses Promises for HTTP requests',
       },
     ],
   },
@@ -195,6 +230,41 @@ const finalPromise: Promise<boolean> = stringPromise
     return str.length > 5; // returns boolean
   });`,
       },
+      {
+        id: 'generic-4',
+        title: 'Promise<void> for Side-Effect Operations',
+        content: `Promise<void> is used for async functions or Promises that don't return a meaningful value — they just perform side effects.
+
+Examples include:
+- Saving data to a database
+- Writing to a file
+- Making an API call without needing the response
+- Completing a task
+
+Using Promise<void> signals to other developers that the caller shouldn't expect a return value.`,
+        codeExample: `// Async function returning Promise<void>
+async function saveUser(name: string): Promise<void> {
+  const user = { name, createdAt: new Date() };
+  await database.save(user);
+  // No return statement needed - void indicates no meaningful return value
+}
+
+// Using Promise<void>
+saveUser('Alice').then(() => {
+  console.log('User saved');
+});
+
+// Promise<void> for fire-and-forget operations
+function logError(message: string): Promise<void> {
+  return fetch('/api/logs', {
+    method: 'POST',
+    body: JSON.stringify({ message, timestamp: Date.now() }),
+  })
+  .then(() => {
+    // void: we don't care about the response
+  });
+}`,
+      },
     ],
     resources: [
       {
@@ -227,14 +297,14 @@ const finalPromise: Promise<boolean> = stringPromise
         title: 'The Problem with Error Types',
         content: `In JavaScript, anything can be thrown - not just Error objects. This includes strings, numbers, objects, or null.
 
-In TypeScript, if you don't specify a type for the error in a .catch() block, TypeScript treats it as unknown (when strict mode is enabled).
+In TypeScript, the error parameter in .catch() callbacks defaults to type 'any', which defeats type safety. In try/catch blocks with strict mode enabled, TypeScript 4.4+ treats the caught error as 'unknown', which forces you to verify the type before using it.
 
-Using unknown forces you to check the actual type before using the error, making your code safer.`,
+To make .catch() callbacks type-safe, you should explicitly annotate the error parameter as 'unknown' so TypeScript requires you to check the actual type.`,
         codeExample: `// Without type annotation, error is 'any' (unsafe)
 const unsafePromise = Promise.reject('Something went wrong');
 
 unsafePromise.catch((error) => {
-  // 'error' is typed as 'any' - dangerous!
+  // Without explicit annotation, 'error' is typed as 'any' (unsafe!)
   console.log(error.message); // Could crash if error is a string
 });
 
@@ -305,6 +375,46 @@ fetchData().catch((error) => {
   console.error('Error:', message);
 });`,
       },
+      {
+        id: 'error-4',
+        title: 'Cleanup with .finally()',
+        content: `The .finally() method runs cleanup code that should execute regardless of whether the Promise fulfilled or rejected.
+
+.finally() is useful for:
+- Closing connections or streams
+- Hiding loading spinners
+- Cleaning up temporary resources
+- Logging that an operation completed
+
+Unlike .then() and .catch(), .finally() doesn't receive a value or error argument. It always returns the original Promise value or error (so the chain continues with the same value/error).`,
+        codeExample: `// Using .finally() for cleanup
+function fetchDataWithCleanup(url: string) {
+  console.log('Loading...');
+  
+  return fetch(url)
+    .then(response => response.json())
+    .catch((error: unknown) => {
+      if (error instanceof Error) {
+        console.error('Error:', error.message);
+      }
+      throw error; // Re-throw to let caller handle it
+    })
+    .finally(() => {
+      // This runs whether the Promise succeeded or failed
+      console.log('Request completed');
+    });
+}
+
+// Another example: closing a connection
+function executeQuery(connection: any, sql: string) {
+  return connection
+    .query(sql)
+    .then(result => result)
+    .finally(() => {
+      connection.close(); // Always close, success or failure
+    });
+}`,
+      },
     ],
     resources: [
       {
@@ -318,9 +428,9 @@ fetchData().catch((error) => {
         description: 'Documentation on JavaScript Error objects and error handling',
       },
       {
-        title: 'TypeScript 4.0: unknown Type',
-        url: 'https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-0.html#new-unknown-top-type',
-        description: 'Introduction of the unknown type and its advantages over any',
+        title: 'TypeScript 4.4: useUnknownInCatchVariables',
+        url: 'https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-4.html#use-unknown-in-catch-variables',
+        description: 'How to use unknown type in try/catch blocks for type-safe error handling',
       },
     ],
   },
@@ -407,6 +517,45 @@ async function processData() {
     throw error;
   }
 }`,
+      },
+      {
+        id: 'advanced-4',
+        title: 'Promise Combinators: allSettled, race, and any',
+        content: `Beyond Promise.all(), TypeScript provides other combinator methods for different use cases:
+
+**Promise.allSettled()** — Waits for all Promises to settle (fulfill or reject), then returns results for both successes and failures.
+
+**Promise.race()** — Returns the result of whichever Promise settles first.
+
+**Promise.any()** — Returns the first fulfilled Promise, or aggregates all rejection reasons if none fulfill.
+
+Use Promise.allSettled() when you want all results regardless of failures (e.g., parallel API calls where some might fail but you want to continue).`,
+        codeExample: `// Promise.allSettled - get all results, even if some fail
+const promises = [
+  Promise.resolve('success'),
+  Promise.reject('failed'),
+  Promise.resolve('also success'),
+];
+
+Promise.allSettled(promises).then((results) => {
+  results.forEach((result, index) => {
+    if (result.status === 'fulfilled') {
+      console.log(\`Result \${index}: \${result.value}\`);
+    } else {
+      console.log(\`Error \${index}: \${result.reason}\`);
+    }
+  });
+});
+
+// Promise.race - get the first to settle
+const raceResults = Promise.race([
+  new Promise(r => setTimeout(() => r('slow'), 1000)),
+  new Promise(r => setTimeout(() => r('fast'), 100)),
+]);
+
+raceResults.then(winner => {
+  console.log('Winner:', winner); // 'fast'
+});`,
       },
     ],
     resources: [
